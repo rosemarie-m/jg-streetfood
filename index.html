@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JG Streetfood — Poblacion, Flores St., Binalonan</title>
+
+  <!-- AUTO-IMAGE RESOLVER: Susubukan ang lahat ng format (.jpg, .png, .jpeg, .jfif, .jpg.jpg) at walang pink icon -->
+  <script>
+    function fixFoodImg(imgEl, originalPath) {
+      const raw = originalPath.replace(/^images\//i, '');
+      const clean = raw.replace(/\.[^/.]+$/, '');
+
+      const attempts = [
+        'images/' + clean + '.jpg',
+        'images/' + clean.toLowerCase() + '.jpg',
+        'images/' + clean.toUpperCase() + '.jpg',
+        'images/' + clean + '.png',
+        'images/' + clean.toLowerCase() + '.png',
+        'images/' + clean + '.jpeg',
+        'images/' + clean + '.jfif',
+        'images/' + clean + '.webp',
+        'images/' + clean + '.jpg.jpg', // Windows hidden extension
+        'images/' + clean + '.png.png',
+        clean + '.jpg',
+        clean + '.png',
+        'images/logo.jpg' // Garantisadong lalabas dahil working ang logo mo!
+      ];
+
+      let idx = parseInt(imgEl.getAttribute('data-fix-idx') || '0', 10);
+      if (idx < attempts.length) {
+        imgEl.setAttribute('data-fix-idx', idx + 1);
+        imgEl.src = attempts[idx];
+      } else {
+        imgEl.onerror = null;
+        imgEl.src = 'images/logo.jpg';
+      }
+    }
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            jg: {
+              primary: '#ff3366',
+              softPink: '#fff0f3',
+              darkBg: '#111317',
+              darkCard: '#191c24',
+              darkBorder: '#282d3b',
+              darkText: '#e4e8f1'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="bg-neutral-50 dark:bg-[#111317] text-neutral-800 dark:text-[#e4e8f1] min-h-screen flex flex-col selection:bg-jg-primary selection:text-white">
+
+  <!-- ==============================================================
+       1. SPLASH SCREEN (VIEW 1)
+  =============================================================== -->
+  <div id="splashView" class="app-view active fixed inset-0 z-50 bg-[#faf7f8] dark:bg-[#111317] items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-white dark:bg-[#191c24] border border-neutral-200 dark:border-[#282d3b] rounded-3xl p-6 sm:p-8 text-center shadow-xl space-y-5">
+      
+      <div class="relative mx-auto w-24 h-24 rounded-3xl bg-jg-softPink dark:bg-[#12141a] flex items-center justify-center border-2 border-jg-primary/40 shadow-md overflow-hidden">
+        <img id="splashLogoImg" 
+             src="images/logo.jpg" 
+             alt="JG Logo" 
+             class="w-full h-full object-cover">
+        <span class="absolute -top-1 -right-1 text-2xl">🍢</span>
+      </div>
+
+      <div>
+        <h1 class="text-2xl font-black text-jg-primary font-display tracking-tight">JG STREETFOOD</h1>
+        <p class="text-xs text-neutral-500 dark:text-neutral-400 font-medium mt-1">Street food made fresh daily</p>
+        <p class="text-xs font-bold text-neutral-700 dark:text-neutral-200 mt-2 bg-jg-softPink dark:bg-[#12141a] py-1.5 px-3 rounded-full inline-block border border-jg-primary/20">
+          "Maykayoon agmeryendaaa!"
+        </p>
+      </div>
+
+      <div class="space-y-3 pt-1">
+        <button type="button" onclick="goToAuth('login')" class="neon-btn w-full py-3 rounded-xl font-bold text-xs cursor-pointer flex items-center justify-center gap-2">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i> Log In to Account
+        </button>
+        <button type="button" onclick="goToAuth('signup')" class="neon-btn-outline w-full py-3 rounded-xl font-bold text-xs cursor-pointer flex items-center justify-center gap-2">
+          <i class="fa-solid fa-user-plus"></i> Create New Account
+        </button>
+        <button type="button" onclick="continueAsGuest()" class="w-full py-2 text-xs text-neutral-500 dark:text-neutral-400 hover:text-jg-primary font-semibold transition cursor-pointer">
+          Continue as Guest &rarr;
+        </button>
+      </div>
+
+      <div class="text-[11px] text-neutral-400 dark:text-neutral-500 pt-3 border-t border-neutral-100 dark:border-[#282d3b]">
+        Poblacion, Flores St., Binalonan, Pangasinan
+      </div>
+    </div>
+  </div>
+
+  <!-- ==============================================================
+       2. AUTHENTICATION VIEW (LOGIN & SIGN UP)
+  =============================================================== -->
+  <div id="authView" class="app-view fixed inset-0 z-40 bg-[#faf7f8] dark:bg-[#111317] items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-white dark:bg-[#191c24] border border-neutral-200 dark:border-[#282d3b] rounded-3xl p-6 sm:p-8 shadow-xl relative">
+      
+      <button type="button" onclick="showSplash()" class="text-xs font-bold text-neutral-500 dark:text-neutral-400 hover:text-jg-primary flex items-center gap-1.5 mb-4 cursor-pointer">
+        <i class="fa-solid fa-arrow-left"></i> Back to Start
+      </button>
+
+      <div class="flex rounded-xl bg-neutral-100 dark:bg-[#12141a] p-1 mb-4 text-xs font-bold border border-neutral-200 dark:border-[#282d3b]">
+        <button type="button" id="authTabLogin" onclick="toggleAuthTab('login')" class="flex-1 py-2 rounded-lg neon-btn text-white transition">Log In</button>
+        <button type="button" id="authTabSignup" onclick="toggleAuthTab('signup')" class="flex-1 py-2 rounded-lg text-neutral-500 dark:text-neutral-400 transition">Sign Up</button>
+      </div>
+
+      <div class="text-center mb-4">
+        <h2 id="authHeading" class="text-xl font-black text-neutral-800 dark:text-white font-display">Welcome Back!</h2>
+        <p id="authSubheading" class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Please sign in to order your meryenda</p>
+      </div>
+
+      <div id="authErrorMessage" class="hidden mb-3 p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-900 text-rose-600 dark:text-rose-300 text-xs font-semibold"></div>
+
+      <form id="authForm" onsubmit="event.preventDefault(); handleAuthSubmit(event); return false;" class="space-y-3 text-xs" autocomplete="on">
+        
+        <div id="signupExtraFields" class="space-y-3 hidden">
+          <div>
+            <label class="block font-semibold text-neutral-600 dark:text-neutral-300 mb-1">Full Name</label>
+            <input id="inputFullName" type="text" placeholder="e.g. Maria Santos" autocomplete="name" class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-50 dark:bg-[#12141a] border border-neutral-200 dark:border-[#282d3b] focus:outline-none focus:border-jg-primary">
+          </div>
+
+          <div>
+            <label class="block font-semibold text-neutral-600 dark:text-neutral-300 mb-1">Account Role</label>
+            <select id="inputRole" onchange="handleRoleSelectChange()" class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-50 dark:bg-[#12141a] border border-neutral-200 dark:border-[#282d3b] font-semibold focus:outline-none focus:border-jg-primary">
+              <option value="customer">Customer (Order Snacks & Cakes)</option>
+              <option value="admin">Stall Owner / Admin (Access POS Dashboard)</option>
+            </select>
+          </div>
+
+          <div id="adminKeyBox" class="hidden p-3 rounded-xl bg-rose-50/70 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-900 space-y-1">
+            <label class="block font-bold text-rose-600 dark:text-rose-400">Admin Security Passkey</label>
+            <input id="inputAdminKey" type="password" placeholder="Enter key (Default: JG2026)" class="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#12141a] border border-rose-300 dark:border-rose-800 focus:outline-none text-xs">
+            <span class="text-[10px] text-rose-500 block">Default Passkey: <strong>JG2026</strong></span>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-neutral-600 dark:text-neutral-300 mb-1">Mobile Phone (09xxxxxxxxx)</label>
+            <input id="inputPhone" type="text" placeholder="09123456789" autocomplete="tel" class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-50 dark:bg-[#12141a] border border-neutral-200 dark:border-[#282d3b] focus:outline-none focus:border-jg-primary">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-neutral-600 dark:text-neutral-300 mb-1">Username</label>
+          <input required id="inputUsername" type="text" placeholder="Your username" autocomplete="username" class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-50 dark:bg-[#12141a] border border-neutral-200 dark:border-[#282d3b] focus:outline-none focus:border-jg-primary">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-neutral-600 dark:text-neutral-300 mb-1">Password</label>
+          <div class="relative">
+            <input required id="inputPassword" type="password" placeholder="••••••••" autocomplete="current-password" class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-50 dark:bg-[#12141a] border border-neutral-200 dark:border-[#282d3b] focus:outline-none focus:border-jg-primary">
+            <button type="button" onclick="togglePassVisibility()" class="absolute right-3.5 top-2.5 text-neutral-400 hover:text-jg-primary cursor-pointer">
+              <i id="passIcon" class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="authSubmitBtn" class="neon-btn w-full py-3 rounded-xl font-bold text-xs mt-2 cursor-pointer">
+          Log In
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==============================================================
+       3. MAIN APPLICATION
+  =============================================================== -->
+  <div id="mainApp" class="app-view flex-col flex-1 pb-24 md:pb-12">
+
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-30 bg-white/95 dark:bg-[#191c24]/95 backdrop-blur-md border-b border-neutral-200 dark:border-[#282d3b] px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-4">
+      
+      <div class="flex items-center gap-2.5 cursor-pointer" onclick="goToPage('home')">
+        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl overflow-hidden bg-jg-softPink border border-jg-primary/30 flex items-center justify-center flex-shrink-0 shadow-xs">
+          <img src="images/logo.jpg" 
+               alt="JG Logo" 
+               class="w-full h-full object-cover">
+        </div>
+        <div>
+          <span class="text-base sm:text-lg font-black text-jg-primary font-display tracking-tight block leading-none">JG STREETFOOD</span>
+          <span class="text-[9px] text-neutral-400 font-bold tracking-wider uppercase block mt-0.5">Binalonan Branch</span>
+        </div>
+      </div>
+
+      <!-- Desktop Navigation Menu -->
+      <nav class="hidden md:flex items-center gap-1.5 bg-neutral-100 dark:bg-[#12141a] p-1.5 rounded-2xl border border-neutral-200 dark:border-[#282d3b] text-xs font-bold">
+        <button onclick="goToPage('home')" id="nav-home" class="nav-btn neon-btn px-4 py-1.5 rounded-xl text-white transition">Home</button>
+        <button onclick="goToPage('menu')" id="nav-menu" class="nav-btn px-4 py-1.5 rounded-xl text-neutral-600 dark:text-neutral-300 hover:text-jg-primary transition">Menu & Combos</button>
+        <button onclick="goToPage('cart')" id="nav-cart" class="nav-btn px-4 py-1.5 rounded-xl text-neutral-600 dark:text-neutral-300 hover:text-jg-primary transition relative">
+          Cart <span id="desktopCartBadge" class="ml-1 px-1.5 py-0.2 rounded-full bg-jg-primary text-white text-[9px] font-bold">0</span>
+        </button>
+        
+        <button onclick="goToPage('user-dashboard')" id="nav-user-dashboard" class="nav-btn px-4 py-1.5 rounded-xl text-neutral-600 dark:text-neutral-300 hover:text-jg-primary transition">
+          My Orders & Tracker
+        </button>
+        
+        <button onclick="goToPage('admin-dashboard')" id="nav-admin-dashboard" class="nav-btn hidden px-4 py-1.5 rounded-xl text-neutral-600 dark:text-neutral-300 hover:text-jg-primary transition">
+          Kitchen POS
+        </button>
+      </nav>
+
+      <!-- Right Header Tools -->
+      <div class="flex items-center gap-2">
+        <button onclick="toggleDarkMode()" class="w-9 h-9 rounded-xl bg-neutral-100 dark:bg-[#12141a] border border-neutral-200 dark:border-[#282d3b] text-neutral-600 dark:text-amber-400 flex items-center justify-center hover:scale-105 transition cursor-pointer">
+          <i id="themeIcon" class="fa-solid fa-moon text-xs"></i>
+        </button>
+
+        <div class="flex items-center gap-2 bg-neutral-100 dark:bg-[#12141a] border border-neutral-200 dark:border-[#282d3b] px-2.5 py-1 rounded-xl text-xs">
+          <div class="w-5 h-5 rounded-full bg-jg-primary text-white font-bold text-[10px] flex items-center justify-center" id="userInitial">G</div>
+          <div class="flex flex-col items-start leading-none">
+            <span class="font-bold text-[11px] truncate max-w-[80px]" id="userDisplayName">Guest</span>
+            <span id="userRoleBadge" class="text-[8px] font-black uppercase text-jg-primary">Customer</span>
+          </div>
+          <button onclick="handleLogout()" class="text-neutral-400 hover:text-jg-primary text-xs pl-1 cursor-pointer">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page 1: Home -->
+    <div id="page-home" class="page-section active page-fade max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8 flex-1 w-full">
+      <div class="bg-[#ffeef2] dark:bg-[#161922] border border-neutral-200 dark:border-[#282d3b] rounded-3xl p-6 sm:p-10 flex flex-col-reverse md:flex-row items-center justify-between gap-6 shadow-xs">
+        <div class="max-w-xl text-center md:text-left space-y-3">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white dark:bg-[#191c24] text-jg-primary text-[10px] sm:text-xs font-black uppercase tracking-wider shadow-xs border border-jg-primary/30">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Fresh Fried Daily
+          </span>
+          <h1 class="text-3xl sm:text-5xl font-black text-jg-primary font-display leading-tight">
+            Good Food,<br>Good Mood!
+          </h1>
+          <p class="text-xs sm:text-sm text-neutral-700 dark:text-neutral-300 font-medium leading-relaxed">
+            Order your meryenda favorites connected directly to our live kitchen stall!
+          </p>
+          <div class="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-3 pt-2">
+            <button onclick="goToPage('menu')" class="neon-btn w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-xs cursor-pointer flex items-center justify-center gap-2">
+              <span>Order Meryenda Now</span> <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex-shrink-0">
+          <div class="w-36 h-36 sm:w-48 sm:h-48 rounded-3xl bg-white/80 dark:bg-[#191c24] p-2 shadow-md flex items-center justify-center border-2 border-jg-primary/30 overflow-hidden">
+            <img src="images/logo.jpg" 
+                 alt="JG Logo Hero" 
+                 class="w-full h-full object-cover rounded-2xl">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page 2: Menu -->
+    <div id="page-menu" class="page-section page-fade max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 flex-1 w-full">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-neutral-200 dark:border-[#282d3b]">
+        <div>
+          <span class="text-[10px] sm:text-xs font-bold text-jg-primary uppercase tracking-wider">Flores St. Table Menu</span>
+          <h2 class="text-xl sm:text-2xl font-black font-display">Popular Street Foods & Cakes</h2>
+        </div>
+        <div class="relative w-full sm:w-64">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-2.5 text-neutral-400 text-xs"></i>
+          <input type="text" oninput="handleMenuSearch(this.value)" placeholder="Search meryenda, cakes..." class="w-full pl-9 pr-3.5 py-2 rounded-xl bg-white dark:bg-[#191c24] border border-neutral-200 dark:border-[#282d3b] text-xs focus:outline-none focus:border-jg-primary">
+        </div>
+      </div>
+
+      <!-- CATEGORY BUTTONS NA LAGING MAY LITRATO -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 custom-scroll text-xs font-semibold">
+        <button onclick="filterCategory('all')" class="cat-pill neon-btn active px-4 py-1.5 rounded-full text-white whitespace-nowrap cursor-pointer" data-cat="all">🔥 All</button>
+        <button onclick="filterCategory('combo')" class="cat-pill px-4 py-1.5 rounded-full bg-white dark:bg-[#191c24] border border-neutral-200 dark:border-[#282d3b] text-neutral-700 dark:text-neutral-200 hover:text-jg-primary whitespace-nowrap cursor-pointer" data-cat="combo">🍱 JG Combos</button>
+        <button onclick="filterCategory('street')" class="cat-pill px-4 py-1.5 rounded-full bg-white dark:bg-[#191c24] border border-neutral-200 dark:border-[#282d3b] text-neutral-700 dark:text-neutral-200 hover:text-jg-primary whitespace-nowrap cursor-pointer" data-cat="street">🍢 Street Snacks</button>
+        <button onclick="filterCategory('drinks')" class="cat-pill px-4 py-1.5 rounded-full bg-white dark:bg-[#191c24] border border-neutral-200 dark:border-[#282d3b] text-neutral-700 dark:text-neutral-200 hover:text-jg-primary whitespace-nowrap cursor-pointer" data-cat="drinks">🧋 Cold Palamig (₱10)</button>
+        <button onclick="filterCategory('cakes')" class="cat-pill px-4 py-1.5 rounded-full bg-white dark:bg-[#191c24] border border-neutral-200 dark:border-[#282d3b] text-neutral-700 dark:text-neutral-200 hover:text-jg-primary whitespace-nowrap cursor-pointer" data-cat="cakes">🎂 Tub Cakes (₱135)</button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="menuItemsContainer"></div>
+    </div>
+
+    <!-- Page 3: Cart -->
+    <div id="page-cart" class="page-section page-fade max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 flex-1 w-full">
+      <div class="pb-3 border-b border-neutral-200 dark:border-[#282d3b]">
+        <h2 class="text-xl sm:text-2xl font-black font-display">Your Cart & Checkout</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+        <div class="md:col-span-7 bg-white dark:bg-[#191c24] border border-neutral-200 dark:border-[#282d3b] rounded-3xl p-5 shadow-xs space-y-3">
+          <h3 class="font-bold text-xs sm:text-sm">Selected Meryenda</h3>
+          <div class="space-y-2.5 max-h-[340px] overflow-y-auto custom-scroll pr-1" id="cartPageList"></div>
+          <button onclick="goToPage('menu')" class="text-xs text-jg-primary font-bold hover:underline inline-block pt-1 cursor-pointer">
+            &larr; Add more food from menu
+          </button>
+        </div>
+
+        <div class="md:col-span-5 bg-white dark:bg-[#191c24] border border-neutral-200 dark:border-[#282d3b] rounded-3xl p-5 shadow-xs space-y-3.5 text-xs">
+          <h3 class="font-bold text-sm">Fulfillment Details</h3>
+
+          <div>
+            <label class="block font-semibold text-neutral-500 dark:text-neutral-400 mb-1">Order Mode</label>
+            <div class="grid grid-cols-2 gap-2 font-semibold">
+              <label class="flex items-center justify-center gap-1.5 p-2 rounded-xl border border-neutral-200 dark:border-[#282d3b] cursor-pointer has-[:checked]:border-jg-primary has-[:checked]:bg-jg-primary has-[:checked]:text-white transition">
+                <input type="radio" name="orderType" value="pickup" checked class="hidden" onchange="calculateCartTotals()">
+                <i class="fa-solid fa-store"></i> Stall Pickup
+              </label>
+              <label class="flex items-center justify-center gap-1.5 p-2 rounded-xl border border-neutral-200 dark:border-[#282d3b] cursor-pointer has-[:checked]:border-jg-primary has-[:checked]:bg-jg-primary has-[:checked]:text-white transition">
+                <input type="radio" name="orderType" value="delivery" class="hidden" onchange="calculateCartTotals()">
+                <i class="fa-solid fa-motorcycle"></i> Delivery
+              </label>
+            </div>
+          </div>
+
+          <div id="cartDeliveryAddressBox" class="hidden">
+            <label class="block font-semibold text-neutral-500 dark:text-neutral-400 mb-1">Landmark / Drop-off (Binalonan)</label>
+            <input type="text" id="cartDeliveryAddress" placeholder="e.g. Near Plaza or Flores St." class="w-full px-3 py-2 rounded-xl bg-neutral-50 dark:bg-[#12141a] border border-neutral-200 dark:border-[#282d3b] text-xs focus:outline-none focus:border-jg-primary">
+          </div>
+
+          <div>
+            <label class="block font-semibold text-neutral-500 dark:text-neutral-400 mb-1">
+              <i class="fa-solid fa-comment-dots text-jg-primary"></i> Special Request / Order Notes (Optional)
+            </label>
+            <textarea id="cartOrderNotes" rows="2" placeholder="Hal: Paki-extra crispy, paki-separate ng plastic, less ice..." class="w-full px-3 py-2 rounded-xl bg-neutral-50 dark:bg-[#12141a] border border-neutral-200 dark:border-[#282d3b] text-xs focus:outline-none focus:border-jg-primary"></textarea>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-neutral-500 dark:text-neutral-400 mb-1">Payment Method</label>
+            <div class="grid grid-cols-2 gap-2 font-semibold">
+              <label class="flex items-center justify-center gap-1.5 p-2 rounded-xl border border-neutral-200 dark:border-[#282d3b] cursor-pointer has-[:checked]:border-jg-primary has-[:checked]:bg-jg-softPink dark:has-[:checked]:bg-[#12141a]">
+                <input type="radio" name="cartPayment" value="Cash" checked class="accent-jg-primary"> Cash
+              </label>
+              <label class="flex items-center justify-center gap-1.5 p-2 rounded-xl border border-neutral-200 dark:border-[#282d3b] cursor-pointer has-[:checked]:border-jg-primary has-[:checked]:bg-jg-softPink dark:has-[:checked]:bg-[#12141a]">
+                <input type="radio" name="cartPayment" value="GCash" class="accent-jg-primary"> <span class="text-blue-500 font-bold">GCash</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-neutral-200 dark:border-[#282d3b] space-y-1">
+            <div class="flex justify-between text-neutral-500 dark:text-neutral-400"><span>Subtotal:</span><span class="font-bold text-neutral-800 dark:text-white" id="cartPageSubtotal">₱0.00</span></div>
+            <div class="flex justify-between text-neutral-500 dark:text-neutral-400"><span>Delivery:</span><span class="font-bold text-neutral-800 dark:text-white" id="cartPageDelivery">₱0.00</span></div>
+            <div class="flex justify-between text-sm font-extrabold text-jg-primary pt-1 border-t border-neutral-200 dark:border-[#282d3b]">
+              <span>Total Amount:</span><span id="cartPageTotal">₱0.00</span>
+            </div>
+          </div>
+
+          <button onclick="handleCheckoutSubmit()" class="neon-btn w-full py-3 rounded-2xl font-bold text-xs cursor-pointer flex items-center justify-center gap-1.5">
+            <span>Confirm Order</span> <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page 4: User Dashboard (Live 4-Step Tracker) -->
+    <div id="page-user-dashboard" class="page-section page-fade max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 flex-1 w-full">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-neutral-200 dark:border-[#282d3b]">
+        <div>
+          <span class="text-[10px] sm:text-xs font-bold text-jg-primary uppercase tracking-wider">Customer Portal</span>
+          <h2 class="text-xl sm:text-2xl font-black font-display">My Account & Live Tracker</h2>
+        </div>
+        <button onclick="goToPage('menu')" class="neon-btn px-4 py-2 rounded-xl font-bold text-xs cursor-pointer flex items-center gap-1.5">
+          <i class="fa-solid fa-utensils"></i> Order Food
+        </button>
+      </div>
+
+      <div id="udLiveTrackerBox" class="hidden"></div>
+
+      <div class="grid grid-cols-3 gap-3">
+        <div class="bg-white dark:bg-[#191c24] border border-neutral-200 dark:border-[#282d3b] rounded-2xl p-4 text-center shadow-xs">
+          <span class="text-[10px] text-neutral-400 font-bold uppercase">Total Orders</span>
+          <div class="text-xl font-black text-neutral-800 dark:text-white font-display mt-0.5" id="udTotalOrders">0</div>
+        </div>
+        <div class="bg-white dark:bg-[#191c24] border border-neutral-200 dark:border-[#282d3b] rounded-2xl p-4 text-center shadow-xs">
+          <span class="text-[10px] text-neutral-400 font-bold uppercase">Active Orders</span>
+          <div class="text-xl font-black text-amber-500 font-display mt-0.5" id="udActiveOrders">0</div>
+        </div>
+        <div class="bg-white dark:bg-[#191c24] border border-neutral-200 dark:border-[#282d3b] rounded-2xl p-4 text-center shadow-xs">
+          <span class="text-[10px] text-neutral-400 font-bold uppercase">Total Spent</span>
+          <div class="text-xl font-black text-jg-primary font-display mt-0.5" id="udTotalSpent">₱0.00</div>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-[#191c24] border border-neutral-200 dark:border-[#282d3b] rounded-3xl p-5 shadow-xs space-y-3">
+        <h3 class="font-bold text-xs sm:text-sm">Order History (Real-time MySQL)</h3>
+        <div class="space-y-3" id="udOrdersList"></div>
+      </div>
+    </div>
+
+    <!-- Page 5: Admin Dashboard -->
+    <div id="page-admin-dashboard" class="page-section page-fade max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 flex-1 w-full">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-neutral-200 dark:border-[#282d3b]">
+        <div>
+          <span class="text-[10px] sm:text-xs font-bold text-jg-primary uppercase tracking-wider">Kitchen POS & Stream</span>
+          <h2 class="text-xl sm:text-2xl font-black font-display">Stall Kitchen Dashboard</h2>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div class="bg-white dark:bg-[#191c24] border border-neutral-200 dark:border-[#282d3b] rounded-2xl p-4 shadow-xs">
+          <span class="text-[10px] sm:text-xs font-semibold text-neutral-400 uppercase">Total Revenue</span>
+          <div class="text-lg sm:text-2xl font-black text-jg-primary font-display mt-0.5" id="adMetricSales">₱0.00</div>
+        </div>
+        <div class="bg-white dark:bg-[#191c24] border border-neutral-200 dark:border-[#282d3b] rounded-2xl p-4 shadow-xs">
+          <span class="text-[10px] sm:text-xs font-semibold text-neutral-400 uppercase">Completed</span>
+          <div class="text-lg sm:text-2xl font-black text-neutral-800 dark:text-white font-display mt-0.5" id="adMetricCompleted">0</div>
+        </div>
+        <div class="bg-white dark:bg-[#191c24] border border-neutral-200 dark:border-[#282d3b] rounded-2xl p-4 shadow-xs">
+          <span class="text-[10px] sm:text-xs font-semibold text-neutral-400 uppercase">Active Queue</span>
+          <div class="text-lg sm:text-2xl font-black text-amber-500 font-display mt-0.5" id="adMetricPending">0</div>
+        </div>
+        <div class="bg-white dark:bg-[#191c24] border border-neutral-200 dark:border-[#282d3b] rounded-2xl p-4 shadow-xs">
+          <span class="text-[10px] sm:text-xs font-semibold text-neutral-400 uppercase">Registered Users</span>
+          <div class="text-lg sm:text-2xl font-black text-neutral-800 dark:text-white font-display mt-0.5" id="adMetricUsers">0</div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 border-b border-neutral-200 dark:border-[#282d3b] pb-2 text-xs">
+        <button id="adTabBtn-orders" onclick="switchAdminTab('orders')" class="neon-btn px-4 py-1.5 rounded-xl font-bold transition cursor-pointer">Live Orders Stream</button>
+        <button id="adTabBtn-users" onclick="switchAdminTab('users')" class="px-4 py-1.5 rounded-xl bg-white dark:bg-[#191c24] border border-neutral-200 dark:border-[#282d3b] text-neutral-500 dark:text-neutral-400 font-semibold transition cursor-pointer">Registered Users in MySQL</button>
+      </div>
+
+      <div id="adSection-orders" class="bg-white dark:bg-[#191c24] border border-neutral-200 dark:border-[#282d3b] rounded-3xl p-4 sm:p-6 shadow-xs">
+        <h3 class="font-bold text-xs sm:text-sm mb-3">Live Orders Stream (MySQL Database)</h3>
+        <div class="overflow-x-auto custom-scroll">
+          <table class="w-full text-left text-xs min-w-[550px]">
+            <thead class="text-[10px] uppercase font-bold text-neutral-400 border-b border-neutral-200 dark:border-[#282d3b]">
+              <tr>
+                <th class="pb-2">Ticket</th>
+                <th class="pb-2">Customer & Phone</th>
+                <th class="pb-2">Items, Flavors & Special Notes</th>
+                <th class="pb-2">Fulfillment</th>
+                <th class="pb-2">Pay</th>
+                <th class="pb-2">Total</th>
+                <th class="pb-2">Update Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-neutral-100 dark:divide-[#282d3b]" id="adOrdersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="adSection-users" class="hidden bg-white dark:bg-[#191c24] border border-neutral-200 dark:border-[#282d3b] rounded-3xl p-4 sm:p-6 shadow-xs">
+        <h3 class="font-bold text-xs sm:text-sm mb-3">Registered Users in MySQL Database</h3>
+        <div class="overflow-x-auto custom-scroll">
+          <table class="w-full text-left text-xs min-w-[450px]">
+            <thead class="text-[10px] uppercase font-bold text-neutral-400 border-b border-neutral-200 dark:border-[#282d3b]">
+              <tr>
+                <th class="pb-2">Name</th>
+                <th class="pb-2">Username</th>
+                <th class="pb-2">Phone</th>
+                <th class="pb-2">Role</th>
+                <th class="pb-2">Registered At</th>
+              </tr>
+            </thead>
+            <tbody id="adUsersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <div id="mobileBottomBar" class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#191c24]/95 backdrop-blur-md border-t border-neutral-200 dark:border-[#282d3b] py-2 px-4 flex items-center justify-around text-neutral-500 dark:text-neutral-400 text-[10px] font-bold md:hidden shadow-lg">
+      <button onclick="goToPage('home')" class="bot-btn flex flex-col items-center gap-1 text-jg-primary" id="bot-home"><i class="fa-solid fa-house text-base"></i><span>Home</span></button>
+      <button onclick="goToPage('menu')" class="bot-btn flex flex-col items-center gap-1" id="bot-menu"><i class="fa-solid fa-utensils text-base"></i><span>Menu</span></button>
+      <button onclick="goToPage('cart')" class="bot-btn flex flex-col items-center gap-1 relative" id="bot-cart">
+        <i class="fa-solid fa-cart-shopping text-base"></i>
+        <span id="mobileCartBadge" class="absolute -top-1 right-2 w-4 h-4 rounded-full bg-jg-primary text-white text-[9px] font-bold flex items-center justify-center">0</span>
+        <span>Cart</span>
+      </button>
+      <button onclick="goToPage('user-dashboard')" class="bot-btn flex flex-col items-center gap-1" id="bot-user-dashboard"><i class="fa-solid fa-user text-base"></i><span>Tracker</span></button>
+      <button onclick="goToPage('admin-dashboard')" class="bot-btn hidden flex flex-col items-center gap-1" id="bot-admin-dashboard"><i class="fa-solid fa-chart-line text-base"></i><span>POS</span></button>
+    </div>
+
+  </div>
+
+  <!-- COMBO & CUSTOMIZER MODAL -->
+  <div id="comboCustomModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-xs items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#191c24] rounded-3xl w-full max-w-sm p-5 shadow-2xl border border-neutral-200 dark:border-[#282d3b] space-y-4 page-fade max-h-[90vh] overflow-y-auto custom-scroll relative">
+      
+      <div class="flex items-start justify-between pb-2 border-b border-neutral-100 dark:border-[#282d3b]">
+        <div>
+          <span class="text-[10px] font-black uppercase text-jg-primary tracking-wider">Customize Your Order</span>
+          <h3 class="font-extrabold text-sm sm:text-base text-neutral-800 dark:text-white" id="customModalItemTitle">JG2 (Drinks + Fries + Kikiam)</h3>
+          <span class="text-xs font-black text-jg-primary" id="customModalItemPrice">₱35</span>
+        </div>
+        <button type="button" onclick="closeCustomModal()" class="w-7 h-7 rounded-full bg-neutral-100 dark:bg-[#12141a] text-neutral-400 hover:text-jg-primary flex items-center justify-center cursor-pointer">
+          <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
+      </div>
+
+      <!-- SECTION 1: FRIES POWDER -->
+      <div id="customSectionPowder" class="space-y-1.5 text-xs">
+        <label class="block font-bold text-neutral-700 dark:text-neutral-200 text-[11px]">Select Fries Flavor Powder:</label>
+        <div class="grid grid-cols-2 gap-1.5">
+          <div onclick="selectCustomOption('powder', 'Cheese')" data-val="Cheese" class="opt-card-powder p-2 rounded-xl border border-jg-primary bg-jg-primary/10 flex items-center justify-between cursor-pointer">
+            <span>🧀 Cheese</span>
+            <i class="opt-check fa-solid fa-check text-jg-primary text-[10px]"></i>
+          </div>
+          <div onclick="selectCustomOption('powder', 'Barbecue')" data-val="Barbecue" class="opt-card-powder p-2 rounded-xl border border-neutral-200 dark:border-[#282d3b] flex items-center justify-between cursor-pointer">
+            <span>🍖 Barbecue</span>
+            <i class="opt-check hidden fa-solid fa-check text-jg-primary text-[10px]"></i>
+          </div>
+          <div onclick="selectCustomOption('powder', 'Sour Cream')" data-val="Sour Cream" class="opt-card-powder p-2 rounded-xl border border-neutral-200 dark:border-[#282d3b] flex items-center justify-between cursor-pointer">
+            <span>🧅 Sour Cream</span>
+            <i class="opt-check hidden fa-solid fa-check text-jg-primary text-[10px]"></i>
+          </div>
+          <div onclick="selectCustomOption('powder', 'Plain / Salted')" data-val="Plain / Salted" class="opt-card-powder p-2 rounded-xl border border-neutral-200 dark:border-[#282d3b] flex items-center justify-between cursor-pointer">
+            <span>🧂 Plain Salt</span>
+            <i class="opt-check hidden fa-solid fa-check text-jg-primary text-[10px]"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: DRINK FLAVOR -->
+      <div id="customSectionDrink" class="space-y-1.5 text-xs">
+        <label class="block font-bold text-neutral-700 dark:text-neutral-200 text-[11px]">Select Cold Palamig Juice:</label>
+        <div class="space-y-1">
+          <div onclick="selectCustomOption('drink', 'Lemon Juice Palamig')" data-val="Lemon Juice Palamig" class="opt-card-drink p-2 rounded-xl border border-jg-primary bg-jg-primary/10 flex items-center justify-between cursor-pointer">
+            <span>🍋 Zesty Lemon Juice Palamig</span>
+            <i class="opt-check fa-solid fa-check text-jg-primary text-[10px]"></i>
+          </div>
+          <div onclick="selectCustomOption('drink', 'Pineapple Juice Palamig')" data-val="Pineapple Juice Palamig" class="opt-card-drink p-2 rounded-xl border border-neutral-200 dark:border-[#282d3b] flex items-center justify-between cursor-pointer">
+            <span>🍍 Tropical Pineapple Juice Palamig</span>
+            <i class="opt-check hidden fa-solid fa-check text-jg-primary text-[10px]"></i>
+          </div>
+          <div onclick="selectCustomOption('drink', 'Blue Lemonade Cooler')" data-val="Blue Lemonade Cooler" class="opt-card-drink p-2 rounded-xl border border-neutral-200 dark:border-[#282d3b] flex items-center justify-between cursor-pointer">
+            <span>🫐 Cold Blue Lemonade</span>
+            <i class="opt-check hidden fa-solid fa-check text-jg-primary text-[10px]"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: DIPPING SAUCE -->
+      <div id="customSectionSauce" class="space-y-1.5 text-xs">
+        <label class="block font-bold text-neutral-700 dark:text-neutral-200 text-[11px]">Select Dipping Sauce:</label>
+        <div class="grid grid-cols-2 gap-1.5">
+          <div onclick="selectCustomOption('sauce', 'Sweet Manong Sauce')" data-val="Sweet Manong Sauce" class="opt-card-sauce p-2 rounded-xl border border-jg-primary bg-jg-primary/10 flex items-center justify-between cursor-pointer">
+            <span>🍯 Sweet Manong</span>
+            <i class="opt-check fa-solid fa-check text-jg-primary text-[10px]"></i>
+          </div>
+          <div onclick="selectCustomOption('sauce', 'Spicy Sweet Sauce')" data-val="Spicy Sweet Sauce" class="opt-card-sauce p-2 rounded-xl border border-neutral-200 dark:border-[#282d3b] flex items-center justify-between cursor-pointer">
+            <span>🌶️ Spicy Sweet</span>
+            <i class="opt-check hidden fa-solid fa-check text-jg-primary text-[10px]"></i>
+          </div>
+          <div onclick="selectCustomOption('sauce', 'Spiced Garlic Vinegar')" data-val="Spiced Garlic Vinegar" class="opt-card-sauce p-2 rounded-xl border border-neutral-200 dark:border-[#282d3b] flex items-center justify-between cursor-pointer">
+            <span>🧄 Sinamak</span>
+            <i class="opt-check hidden fa-solid fa-check text-jg-primary text-[10px]"></i>
+          </div>
+          <div onclick="selectCustomOption('sauce', 'Sauce on the Side')" data-val="Sauce on the Side" class="opt-card-sauce p-2 rounded-xl border border-neutral-200 dark:border-[#282d3b] flex items-center justify-between cursor-pointer">
+            <span>🥣 Hiwalay</span>
+            <i class="opt-check hidden fa-solid fa-check text-jg-primary text-[10px]"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- SPECIAL REQUEST -->
+      <div class="space-y-1 text-xs">
+        <label class="block font-bold text-neutral-700 dark:text-neutral-200 text-[11px]">
+          <i class="fa-solid fa-pen text-jg-primary"></i> Special Request for this item:
+        </label>
+        <input id="customModalItemNotes" type="text" placeholder="Hal: Paki-well done, huwag masyadong maasim..." class="w-full px-3 py-1.5 rounded-xl bg-neutral-50 dark:bg-[#12141a] border border-neutral-200 dark:border-[#282d3b] text-xs focus:outline-none focus:border-jg-primary">
+      </div>
+
+      <!-- Quantity Adjuster -->
+      <div class="flex items-center justify-between pt-2 border-t border-neutral-100 dark:border-[#282d3b]">
+        <span class="text-xs font-bold text-neutral-500">Quantity</span>
+        <div class="flex items-center gap-3 bg-neutral-100 dark:bg-[#12141a] px-3 py-1 rounded-xl border border-neutral-200 dark:border-[#282d3b]">
+          <button type="button" onclick="changeCustomModalQty(-1)" class="font-bold text-sm">-</button>
+          <span id="customModalQtyDisplay" class="font-bold text-xs">1</span>
+          <button type="button" onclick="changeCustomModalQty(1)" class="font-bold text-sm">+</button>
+        </div>
+      </div>
+
+      <button type="button" onclick="confirmAddCustomToCart()" class="neon-btn w-full py-2.5 rounded-xl font-bold text-xs cursor-pointer flex items-center justify-center gap-2">
+        <i class="fa-solid fa-cart-plus"></i> <span id="customModalConfirmBtnText">Add to Cart • ₱35.00</span>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- Receipt Modal -->
+  <div id="receiptModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#191c24] rounded-3xl w-full max-w-xs p-6 shadow-2xl border border-neutral-200 dark:border-[#282d3b] text-center">
+      <div class="w-12 h-12 rounded-full bg-jg-softPink dark:bg-[#12141a] text-jg-primary border border-jg-primary/40 flex items-center justify-center text-lg mx-auto mb-2 shadow-inner"><i class="fa-solid fa-check"></i></div>
+      <h3 class="text-lg font-black text-jg-primary font-display">Order Confirmed!</h3>
+      <p class="text-[11px] text-neutral-400 mt-0.5">Saved directly to MySQL Database</p>
+      
+      <div class="my-3 p-3 rounded-2xl bg-neutral-50 dark:bg-[#12141a] border border-dashed border-neutral-200 dark:border-[#282d3b] text-left text-xs space-y-1">
+        <div class="flex justify-between"><span class="text-neutral-400">Ticket:</span><span class="font-extrabold" id="rTicketId">#JG-0000</span></div>
+        <div class="flex justify-between"><span class="text-neutral-400">Payment:</span><span class="font-bold text-emerald-500" id="rPaymentMode">Cash</span></div>
+        <div class="flex justify-between pt-1 border-t border-neutral-200 dark:border-[#282d3b]"><span class="font-bold">Total:</span><span class="font-black text-jg-primary" id="rTotalAmount">₱0.00</span></div>
+      </div>
+
+      <button onclick="closeReceiptModal()" class="neon-btn w-full py-2.5 rounded-xl font-bold text-xs cursor-pointer">
+        Track Live Status
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-16 sm:bottom-6 left-6 z-50 bg-[#191c24] text-white border border-[#282d3b] text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+    <span class="w-2 h-2 rounded-full bg-emerald-400"></span><span id="toastMsg">Action completed</span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="data.js?v=2026_PERFECT"></script>
+  <script src="accounts.js?v=2026_PERFECT"></script>
+  <script src="cart.js?v=2026_PERFECT"></script>
+  <script src="user-dashboard.js?v=2026_PERFECT"></script>
+  <script src="admin-dashboard.js?v=2026_PERFECT"></script>
+  <script src="app.js?v=2026_PERFECT"></script>
+
+  <!-- ==============================================================
+       OVERRIDE SCRIPT: DITO MISMO SA INDEX.HTML PARA KAHIT ANONG PINDOT SA COMBO AY MAY LITRATO!
+  =============================================================== -->
+  <script>
+    var ALL_MENU_PRODUCTS = [
+      { id: 1, title: "JG1 (Drinks + Fries)", desc: "Solo crispy fries & cold palamig juice", price: 30, priceTag: "₱30", category: "combo", badge: "Best Value", img: "images/JG1.jpg" },
+      { id: 2, title: "JG2 (Drinks + Fries + Kikiam)", desc: "Solo fries, 3 pcs kikiam & cold drink", price: 35, priceTag: "₱35", category: "combo", badge: "Bestseller", img: "images/JG1.jpg" },
+      { id: 3, title: "JG3 (Drinks + Fries + Hotdog)", desc: "Solo fries, 3 pcs red hotdog & juice", price: 40, priceTag: "₱40", category: "combo", badge: "Heavy Meryenda", img: "images/JG1.jpg" },
+      { id: 4, title: "Fishball (7 pcs)", desc: "Golden fried street fishballs with sauce", price: 5, priceTag: "₱5 / 7pcs", category: "street", badge: "Classic ₱5", img: "images/fishball.jpg" },
+      { id: 5, title: "Kikiam (3 pcs)", desc: "Savory fried spiced kikiam skewers", price: 5, priceTag: "₱5 / 3pcs", category: "street", badge: "Crispy", img: "images/kikiam.jpg" },
+      { id: 6, title: "Pinoy Hotdog (3 pcs)", desc: "Tender Filipino cocktail red hotdogs", price: 10, priceTag: "₱10 / 3pcs", category: "street", badge: "Favorite", img: "images/hotdog.jpg" },
+      { id: 7, title: "Solo Fries", desc: "Crispy seasoned golden potato french fries", price: 25, priceTag: "₱25", category: "street", badge: "Hot Fry", img: "images/fries.jpg" },
+      { id: 8, title: "Lemon Juice Palamig", desc: "Cold dispenser-chilled lemon refresher", price: 10, priceTag: "₱10", category: "drinks", badge: "Cold Palamig", img: "images/juice.jpg" },
+      { id: 9, title: "Pineapple Juice Palamig", desc: "Sweet tropical chilled pineapple cooler", price: 10, priceTag: "₱10", category: "drinks", badge: "Tropical", img: "images/juice.jpg" },
+      { id: 10, title: "YEMA CAKE (Tub)", desc: "Soft sponge cake covered in sweet custard yema", price: 135, priceTag: "₱135", category: "cakes", badge: "Tub Bestseller", img: "images/yema-cake.jpg" },
+      { id: 11, title: "UBE CAKE (Tub)", desc: "Authentic purple yam cake in sealed tub", price: 135, priceTag: "₱135", category: "cakes", badge: "Halaya Cake", img: "images/ube-cake.jpg" },
+      { id: 12, title: "CHOCOLATE CAKE (Tub)", desc: "Moist chocolate ganache fudge cake", price: 135, priceTag: "₱135", category: "cakes", badge: "Fudge Tub", img: "images/choco-cake.jpg" },
+      { id: 13, title: "DARK CHOCO CAKE (Tub)", desc: "Semi-sweet dark cocoa decadent tub cake", price: 135, priceTag: "₱135", category: "cakes", badge: "Dark Cocoa", img: "images/darkchoco-cake.jpg" }
+    ];
+
+    // Direktang Card Renderer na laging may litrato
+    function renderMenuGrid(items) {
+      const container = document.getElementById('menuItemsContainer');
+      if (!container) return;
+
+      const list = (items && items.length > 0) ? items : ALL_MENU_PRODUCTS;
+
+      container.innerHTML = list.map(product => {
+        const needsCustomization = product.category === 'combo' || 
+                                   product.category === 'street' || 
+                                   product.title.includes('Fries');
+
+        const buttonHtml = needsCustomization
+          ? `<button type="button" onclick="requestAddToCart(${product.id})" class="neon-btn-sm px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+               <i class="fa-solid fa-sliders text-[10px]"></i> Customize & Add
+             </button>`
+          : `<button type="button" onclick="addDirectToCart(${product.id})" class="neon-btn px-4 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+               <i class="fa-solid fa-plus text-[10px]"></i> Add
+             </button>`;
+
+        return `
+          <div class="bg-white dark:bg-[#191c24] border border-neutral-200 dark:border-[#282d3b] rounded-2xl p-3.5 flex flex-col justify-between hover:border-jg-primary/60 transition shadow-xs">
+            <div>
+              <div class="relative w-full h-36 rounded-xl overflow-hidden mb-2.5 bg-neutral-100 dark:bg-[#12141a] flex items-center justify-center">
+                <img src="${product.img}" 
+                     alt="${product.title}" 
+                     class="w-full h-full object-cover rounded-xl transition duration-300 hover:scale-105"
+                     onerror="fixFoodImg(this, '${product.img}')">
+                <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-white/95 dark:bg-[#191c24] text-[9px] font-black text-jg-primary uppercase border border-jg-primary/30 shadow-xs z-10">
+                  ${product.badge || 'Fresh'}
+                </span>
+              </div>
+              <h4 class="font-bold text-xs sm:text-sm text-neutral-800 dark:text-neutral-100 font-display">${product.title}</h4>
+              <p class="text-[10px] text-neutral-500 dark:text-neutral-400 line-clamp-2 mt-0.5">${product.desc}</p>
+            </div>
+
+            <div class="flex items-center justify-between pt-2.5 mt-2 border-t border-neutral-100 dark:border-[#282d3b]">
+              <span class="text-xs font-black text-jg-primary font-display">${product.priceTag || '₱' + product.price}</span>
+              ${buttonHtml}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // OVERRIDE FILTERING: Kahit pindutin ang "JG Combos" ay LITRATO NA ANG LALABAS!
+    function filterCategory(cat) {
+      document.querySelectorAll('.cat-pill').forEach(btn => {
+        const isTarget = btn.getAttribute('data-cat') === cat;
+        btn.classList.toggle('neon-btn', isTarget);
+        btn.classList.toggle('text-white', isTarget);
+      });
+      if (cat === 'all') renderMenuGrid(ALL_MENU_PRODUCTS);
+      else renderMenuGrid(ALL_MENU_PRODUCTS.filter(p => p.category === cat));
+    }
+
+    function handleMenuSearch(keyword) {
+      const term = keyword.toLowerCase().trim();
+      renderMenuGrid(ALL_MENU_PRODUCTS.filter(p => p.title.toLowerCase().includes(term) || p.desc.toLowerCase().includes(term)));
+    }
+
+    // Siguraduhing mag-render agad pagkabukas
+    window.addEventListener('load', () => {
+      renderMenuGrid(ALL_MENU_PRODUCTS);
+    });
+  </script>
+</body>
+</html>
